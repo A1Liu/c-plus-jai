@@ -30,7 +30,7 @@ extern const TemporaryMemory TEMPORARY_MEMORY_NAMESPACE;
 
 typedef struct {
   char* (*format)(char* fmt, ...);
-  char* (*va_format)(char* fmt, va_list args);
+  char* (*vformat)(char* fmt, va_list args);
   void (*print)(char* fmt, ...);
   void (*println)(char* fmt, ...);
 } TemporaryString;
@@ -47,7 +47,7 @@ typedef struct {
   size_t (*capacity)(void);
   void (*set_capacity)(size_t);
   char* (*format)(char* fmt, ...);
-  char* (*va_format)(char* fmt, va_list args);
+  char* (*vformat)(char* fmt, va_list args);
   void (*print)(char* fmt, ...);
   void (*println)(char* fmt, ...);
 } TemporaryMemoryUtilities;
