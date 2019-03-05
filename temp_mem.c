@@ -23,6 +23,19 @@ static char* current_buffer_location;
 static char* mem_buffer = NULL;
 static int mem_buffer_capacity = DEFAULT_TMEM_CAPACITY;
 
+const TemporaryMemory TEMPORARY_MEMORY_NAMESPACE = {
+  alloc, mem_free, root,
+  location, set_location,
+  size, capacity, set_capacity };
+
+const TemporaryString TEMPORARY_STRING_NAMESPACE = {format,va_format,print,println};
+
+const TemporaryMemoryUtilities TEMPORARY_MEMORY_UTILITIES_NAMESPACE = {
+  alloc, mem_free, root,
+  location, set_location,
+  size, capacity, set_capacity,
+  format, va_format, print, println };
+
 static void*
 alloc(size_t size) {
   if (mem_buffer == NULL) {
@@ -169,10 +182,4 @@ println(char* fmt, ...)
   printf("%s\n",va_format(fmt, args));
   va_end(args);
 }
-
-const TemporaryMemory TEMPORARY_MEMORY_NAMESPACE = {
-  alloc, mem_free, root,
-  location, set_location,
-  size, capacity, set_capacity };
-const TemporaryString TEMPORARY_STRING_NAMESPACE = {format,va_format,print,println};
 
