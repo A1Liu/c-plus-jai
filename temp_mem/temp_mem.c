@@ -1,7 +1,6 @@
 #include "temp_mem.h"
 #include <stdlib.h>
 #include <stdio.h>
-#include <string.h>
 
 #ifndef DEFAULT_TMEM_CAPACITY
 #define DEFAULT_TMEM_CAPACITY 10000
@@ -27,7 +26,7 @@ static void println(char* fmt, ...);
 
 static char* current_buffer_location;
 static char* mem_buffer = NULL;
-static uint32_t mem_buffer_capacity = DEFAULT_TMEM_CAPACITY;
+static uint32_t mem_buffer_capacity = 0;
 
 const TemporaryMemory TEMPORARY_MEMORY_NAMESPACE = {
   alloc, mem_free, root, change_buffer,
@@ -45,14 +44,14 @@ const TemporaryMemoryUtilities TEMPORARY_MEMORY_UTILITIES_NAMESPACE = {
 
 static void*
 alloc(size_t size) {
-  static void* current;
+  static char* current;
   if (mem_buffer == NULL) {
     #if TEMPORARY_MEMORY_DEBUG_MESSAGES
     printf("[DEBUG] " #TEMPORARY_MEMORY_NAMESPACE
         ".alloc(): Buffer allocation of size %d\n",
-        DEFAULT_TMEM_CAPACITY * sizeof(char*));
+        DEFAULT_TMEM_CAPACITY);
     #endif
-    set_capacity(DEFAULT_TMEM_CAPACITY * sizeof(char*));
+    set_capacity(DEFAULT_TMEM_CAPACITY);
   }
   current = current_buffer_location;
   current_buffer_location += size / sizeof(char*);
@@ -74,10 +73,14 @@ mem_free(void)
   printf("[DEBUG] " #TEMPORARY_MEMORY_NAMESPACE
       ".free(): Freeing buffer at %p\n", mem_buffer);
   #endif
-  free(mem_buffer);
-  mem_buffer = NULL;
-  current_buffer_location = NULL;
-  mem_buffer_capacity = 0;
+  if (mem_buffer == NULL) {
+    return;
+  } else {
+    free(mem_buffer);
+    mem_buffer = NULL;
+    current_buffer_location = NULL;
+    mem_buffer_capacity = 0;
+  }
 }
 
 static
@@ -146,22 +149,37 @@ void
 set_capacity(size_t size)
 {
   static size_t true_capacity;
-  if (mem_buffer_capacity == 0) {
+  if (size == 0) {
     #if TEMPORARY_MEMORY_DEBUG_MESSAGES
     printf("[DEBUG] " #TEMPORARY_MEMORY_NAMESPACE
-        ".set_capacity(): Setting capacity to %d\n", size);
+        ".set_capacity(): Got a size of 0; doing nothing.\n");
+    #endif
+    return;
+  } else if (mem_buffer != NULL && mem_buffer_capacity == 0) {
+    #if TEMPORARY_MEMORY_DEBUG_MESSAGES
+    printf("[DEBUG] " #TEMPORARY_MEMORY_NAMESPACE
+        ".set_capacity(): Setting capacity value to %d\n", size);
     #endif
     mem_buffer_capacity = size / sizeof(char*);
     true_capacity = mem_buffer_capacity * sizeof(char*);
   } else if (size <= true_capacity && size > true_capacity * .75 ) {
+    #if TEMPORARY_MEMORY_DEBUG_MESSAGES
+    printf("[DEBUG] " #TEMPORARY_MEMORY_NAMESPACE
+        ".set_capacity(): Setting capacity value to %d\n", size);
+    #endif
     mem_buffer_capacity = size / sizeof(char*);
     current_buffer_location = mem_buffer;
   } else {
-    if (mem_buffer != NULL)
-      free(mem_buffer);
-    current_buffer_location = mem_buffer = malloc(size);
+    #if TEMPORARY_MEMORY_DEBUG_MESSAGES
+    printf("[DEBUG] " #TEMPORARY_MEMORY_NAMESPACE
+        ".set_capacity(): Reallocating buffer with size %d\n", size);
+    #endif
+    mem_free();
     mem_buffer_capacity = size / sizeof(char*);
+    if (size % sizeof(char*) != 0)
+      mem_buffer_capacity += 1;
     true_capacity = mem_buffer_capacity * sizeof(char*);
+    current_buffer_location = mem_buffer = malloc(true_capacity);
   }
 }
 
