@@ -4,11 +4,11 @@
 #include <stdarg.h>
 
 #ifndef TEMPORARY_MEMORY_NAMESPACE
-#define TEMPORARY_MEMORY_NAMESPACE t_mem
+#define TEMPORARY_MEMORY_NAMESPACE tm
 #endif
 
 #ifndef TEMPORARY_STRING_NAMESPACE
-#define TEMPORARY_STRING_NAMESPACE t_str
+#define TEMPORARY_STRING_NAMESPACE ts
 #endif
 
 #ifndef TEMPORARY_MEMORY_NAMESPACE
@@ -19,6 +19,7 @@ typedef struct {
   void* (*alloc)(size_t);
   void (*release)(void);
   void* (*root)(void);
+  void (*change_buffer)(void* new_root, size_t new_capacity);
   void* (*loc)(void);
   void (*free)(void*);
   size_t (*size)(void);
@@ -41,6 +42,7 @@ typedef struct {
   void* (*alloc)(size_t);
   void (*release)(void);
   void* (*root)(void);
+  void (*change_buffer)(void* new_root, size_t new_capacity);
   void* (*loc)(void);
   void (*free)(void*);
   size_t (*size)(void);

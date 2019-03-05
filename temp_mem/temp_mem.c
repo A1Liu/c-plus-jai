@@ -4,11 +4,14 @@
 #include <stdio.h>
 #include <string.h>
 
+#ifndef DEFAULT_TMEM_CAPACITY
 #define DEFAULT_TMEM_CAPACITY 10000
+#endif
 
 static void* alloc(size_t);
 static void mem_free(void);
 static void* root(void);
+static void change_buffer(void*, size_t);
 static void* location(void);
 static void set_location(void* loc);
 static size_t size(void);
@@ -24,25 +27,26 @@ static char* mem_buffer = NULL;
 static int mem_buffer_capacity = DEFAULT_TMEM_CAPACITY;
 
 const TemporaryMemory TEMPORARY_MEMORY_NAMESPACE = {
-  alloc, mem_free, root,
+  alloc, mem_free, root, change_buffer,
   location, set_location,
   size, capacity, set_capacity };
 
 const TemporaryString TEMPORARY_STRING_NAMESPACE = {format,va_format,print,println};
 
 const TemporaryMemoryUtilities TEMPORARY_MEMORY_UTILITIES_NAMESPACE = {
-  alloc, mem_free, root,
+  alloc, mem_free, root, change_buffer,
   location, set_location,
   size, capacity, set_capacity,
   format, va_format, print, println };
 
 static void*
 alloc(size_t size) {
+  static void* current;
   if (mem_buffer == NULL) {
     mem_buffer = malloc(sizeof(char*) * DEFAULT_TMEM_CAPACITY);
     current_buffer_location = mem_buffer;
   }
-  void* current = current_buffer_location;
+  current = current_buffer_location;
   current_buffer_location += size / sizeof(char*);
   if (size % sizeof(char*) != 0)
     current_buffer_location += 1;
@@ -67,6 +71,15 @@ root(void)
 }
 
 static
+void
+change_buffer(void* new_root, size_t new_capacity)
+{
+  mem_free();
+  mem_buffer = new_root;
+  set_capacity(new_capacity);
+}
+
+static
 void*
 location(void)
 {
@@ -79,11 +92,6 @@ set_location(void* loc)
 {
   if (loc == NULL) {
     current_buffer_location = mem_buffer;
-  } else if ((char*) loc < mem_buffer
-      || (char*) loc > mem_buffer + capacity())
-  { // If loc is outside our current buffer
-    current_buffer_location = mem_buffer = loc;
-    mem_buffer_capacity = 0;
   } else {
     current_buffer_location = loc;
   }
@@ -107,14 +115,17 @@ static
 void
 set_capacity(size_t size)
 {
+  static size_t true_capacity = DEFAULT_TMEM_CAPACITY;
   if (mem_buffer_capacity == 0) {
     mem_buffer_capacity = size / sizeof(char*);
-  } else if (size <= capacity() && size > capacity() * .75 ) {
+  } else if (size <= true_capacity && size > true_capacity * .75 ) {
+    mem_buffer_capacity = size / sizeof(char*);
     current_buffer_location = mem_buffer;
   } else {
-    free(mem_buffer);
+    if (mem_buffer != NULL)
+      free(mem_buffer);
     current_buffer_location = mem_buffer = malloc(size);
-    mem_buffer_capacity = size / sizeof(char*);
+    true_capacity = mem_buffer_capacity = size / sizeof(char*);
   }
 }
 
@@ -154,7 +165,8 @@ va_format(char* fmt, va_list args)
   prediction = actual * NEW_WEIGHT + prediction * OLD_WEIGHT;
   if (len <= predicted_len) {
     // Set location back to not waste space
-    set_location(buffer - (predicted_len - len) * sizeof(char) / sizeof(char*));
+    set_location(
+        buffer - (predicted_len - len) * sizeof(char) / sizeof(char*));
     return buffer;
   } else {
     alloc(sizeof(char) * (len - predicted_len));
