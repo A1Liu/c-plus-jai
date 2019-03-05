@@ -36,11 +36,13 @@ const TemporaryMemory TEMPORARY_MEMORY_NAMESPACE = {
 const TemporaryString TEMPORARY_STRING_NAMESPACE =
   { format, va_format, print, println };
 
-const TemporaryMemoryUtilities TEMPORARY_MEMORY_UTILITIES_NAMESPACE = {
-  alloc, mem_free, root, change_buffer,
+const TemporaryMemoryUtilities TEMPORARY_MEMORY_UTILITIES_NAMESPACE =
+{
+  { alloc, mem_free, root, change_buffer,
   location, set_location,
-  size, capacity, set_capacity,
-  format, va_format, print, println };
+  size, capacity, set_capacity },
+  { format, va_format, print, println }
+};
 
 static void*
 alloc(size_t size) {
