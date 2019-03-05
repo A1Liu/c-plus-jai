@@ -45,7 +45,8 @@ const TemporaryMemoryUtilities TEMPORARY_MEMORY_UTILITIES_NAMESPACE =
 };
 
 static void*
-alloc(size_t size) {
+alloc(size_t size)
+{
   static char* current;
   if (mem_buffer == NULL) {
     #if TEMPORARY_MEMORY_DEBUG_MESSAGES
