@@ -6,14 +6,6 @@
 
 #define DEFAULT_TMEM_CAPACITY 10000
 
-int main() {
-  char* hello = T.alloc(sizeof(char*) * 20);
-  strcpy(hello, "");
-  tstr.println("%d", T.size());
-  tstr.println("%d", sizeof(char*) * 20);
-  return 0;
-}
-
 static void* alloc(size_t);
 static void mem_free(void);
 static void* root(void);
