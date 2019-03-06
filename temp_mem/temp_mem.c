@@ -23,6 +23,9 @@ static char* format(char* fmt, ...);
 static char* va_format(char* fmt, va_list args);
 static void print(char* fmt, ...);
 static void println(char* fmt, ...);
+// TODO File I/O
+// static void *write(FILE* out, char* fmt, ...);
+// static char* *read_until(FILE* in, char until);
 
 static char* current_buffer_location;
 static char* mem_buffer = NULL;
