@@ -2,6 +2,7 @@
 #define TEMPORARY_MEMORY_ALLOCATOR
 #include <ctype.h>
 #include <stdarg.h>
+#include <stdio.h>
 
 #ifndef TEMPORARY_MEMORY_NAMESPACE
 #define TEMPORARY_MEMORY_NAMESPACE tm
@@ -13,6 +14,14 @@
 
 #ifndef TEMPORARY_MEMORY_UTILITIES_NAMESPACE
 #define TEMPORARY_MEMORY_UTILITIES_NAMESPACE t
+#endif
+
+#ifndef DEFAULT_TMEM_CAPACITY
+#define DEFAULT_TMEM_CAPACITY 10000
+#endif
+
+#ifndef TEMPORARY_MEMORY_DEBUG_MESSAGES
+#define TEMPORARY_MEMORY_DEBUG_MESSAGES 0
 #endif
 
 typedef struct {
@@ -32,8 +41,9 @@ extern const TemporaryMemory TEMPORARY_MEMORY_NAMESPACE;
 typedef struct {
   char* (*format)(char* fmt, ...);
   char* (*vformat)(char* fmt, va_list args);
-  void (*print)(char* fmt, ...);
-  void (*println)(char* fmt, ...);
+//  void (*print)(char* fmt, ...);
+//  void (*println)(char* fmt, ...);
+//  void (*fprint)(FILE* buf, char* fmt, ...);
 } TemporaryString;
 
 extern const TemporaryString TEMPORARY_STRING_NAMESPACE;
